@@ -31,41 +31,41 @@ function checkScreenLimit(onScreen){
     return false;
 }
 
-function checkInput(input){
+function checkInput(input, currentScreen){
     switch (true){
         // case (input === "="):
         //     console.log("You clicked =");
         //     operate(operator, num, anotherNum);
         //     break;
         case (onlyNum.includes(input)):
-            if (screen.textContent === "0"){
-                screen.textContent = button.textContent;
+            if (currentScreen == "0"){
+                screen.textContent = input;
                 console.log("Starting");
             }else{
-                screen.textContent += button.textContent;
+                screen.textContent  += input;
                 console.log("Adding number")
             }
             break;
         case (onlyOpe.includes(input)):
-            if (screen.textContent.slice(-1) === input){
+            if (currentScreen.slice(-1) == input){
                 console.log("OpeLast.1 case works");
-            }else if(screen.textContent.includes(input)){
+            }else if(currentScreen.includes(input)){
                 console.log("HasOpe.2 case works");
             }
             break;
-        case (input === "DEL"):
+        case (input == "DEL"):
             console.log("DEL case works");
             break;
-        case (input === "C"):
+        case (input == "C"):
             console.log("C case works");
             break;
-        case (input === "+/-"):
+        case (input == "+/-"):
             console.log("Positive/Negative case works");
             break;
-        case (input === "EXP"):
+        case (input == "EXP"):
             console.log("exp case works");
             break;
-        case (input === "%"):
+        case (input == "%"):
             console.log("% case works");
             break;
     }
@@ -75,10 +75,10 @@ function addToScreen(button){
     button.addEventListener("click", () => {
         if (button.textContent === "="){
             console.log("You clicked =")
-            // operate();
+            operate(operator, num, anotherNum);
         } else{
             if (checkScreenLimit(screen.textContent.length)){
-                checkInput(button.textContent);
+                checkInput(button.textContent, screen.textContent);
             }
         }
     })
