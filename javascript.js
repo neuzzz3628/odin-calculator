@@ -1,94 +1,129 @@
-let num = 0, operator = "+", anotherNum= 0, operatorCount = 0;
-function add(a, b) {
-    return a + b;
-};
+// Initialize variables
+let num1 = '';
+let operator = null;
+let num2 = '';
+let refreshScreen = false;
 
-function subtract(a, b) {
-    return a - b;
-};
-
-function multiply(a, b) {
-    return a * b;
-};
-
-function divide(a, b) {
-    return a / b;
-};
-
-function operate(operator, num1, num2) {
-    const arr = { "+": add(num1, num2), 
-                  "-": subtract(num1, num2), 
-                  "*": multiply(num1, num2), 
-                  "/": divide(num1, num2) }
-    return arr[operator];
-};
-
-//Codes that work with HTML
-function checkScreenLimit(onScreen){
-    if(onScreen < 25){
-        return true;
-    }
-    return false;
-}
-
-function checkInput(input, currentScreen){
-    switch (true){
-        // case (input === "="):
-        //     console.log("You clicked =");
-        //     operate(operator, num, anotherNum);
-        //     break;
-        case (onlyNum.includes(input)):
-            if (currentScreen == "0"){
-                screen.textContent = input;
-                console.log("Starting");
-            }else{
-                screen.textContent  += input;
-                console.log("Adding number")
-            }
-            break;
-        case (onlyOpe.includes(input)):
-            if (currentScreen.slice(-1) == input){
-                console.log("OpeLast.1 case works");
-            }else if(currentScreen.includes(input)){
-                console.log("HasOpe.2 case works");
-            }
-            break;
-        case (input == "DEL"):
-            console.log("DEL case works");
-            break;
-        case (input == "C"):
-            console.log("C case works");
-            break;
-        case (input == "+/-"):
-            console.log("Positive/Negative case works");
-            break;
-        case (input == "EXP"):
-            console.log("exp case works");
-            break;
-        case (input == "%"):
-            console.log("% case works");
-            break;
-    }
-}
-
-function addToScreen(button){
-    button.addEventListener("click", () => {
-        if (button.textContent === "="){
-            console.log("You clicked =")
-            operate(operator, num, anotherNum);
-        } else{
-            if (checkScreenLimit(screen.textContent.length)){
-                checkInput(button.textContent, screen.textContent);
-            }
-        }
-    })
-}
 const onlyNum = '0123456789';
 const onlyOpe = '+-*/';
 
-let input;
-const screen = document.querySelector(".screen");
-const prev = document.querySelector(".prev");
-const btn = document.querySelectorAll("button");
+// Select elements
+const largeScreen = document.querySelector('.largeScreen');
+const smallScreen = document.querySelector('.smallScreen');
+const buttons = document.querySelectorAll('button');
 
-btn.forEach((button) => addToScreen(button))
+// Utility functions
+function roundToTwo(num) {
+    return Math.round(num * 100) / 100;
+}
+
+function resetCalculator() {
+    largeScreen.textContent = '';
+    smallScreen.textContent = '';
+    num1 = num2 = '';
+    operator = null;
+}
+
+function isScreenLimitReached(screen) {
+    return screen.length >= 25;
+}
+
+function operate(num1, operator, num2) {
+    switch (operator) {
+        case '+': return roundToTwo(num1 + num2);
+        case '-': return roundToTwo(num1 - num2);
+        case '*': return roundToTwo(num1 * num2);
+        case '/': 
+            if (num2 === 0) {
+                alert('Error: Division by 0');
+                resetCalculator();
+                return;
+            }
+            return roundToTwo(num1 / num2);
+        case '%': return roundToTwo(num1 % num2);
+        case '^': return roundToTwo(num1 ** num2);
+    }
+}
+
+function evaluate(){
+    if (operator === null || refreshScreen) return;
+    num2 = largeScreen.textContent;
+    smallScreen.textContent = `${num1} ${operator} ${num2} =`;
+    largeScreen.textContent = operate(Number(num1),operator,Number(num2));
+    operator = null;
+    refreshScreen = true;
+}
+
+// Event handler for button clicks
+function handleButtonClick(buttonValue) {
+    if (onlyNum.includes(buttonValue)){
+        if(refreshScreen){
+            largeScreen.textContent = '';
+            refreshScreen = false;
+        }
+        if (!isScreenLimitReached(largeScreen.textContent)) {
+            largeScreen.textContent += buttonValue;
+        }
+    } else if (onlyOpe.includes(buttonValue)|| buttonValue === 'EXP'){
+        if (operator !== null) evaluate();
+        num1 = largeScreen.textContent;
+        (buttonValue !== 'EXP') ? operator = buttonValue : operator = '^'
+        smallScreen.textContent = `${num1} ${operator}`;
+        refreshScreen = true;
+    } else if (buttonValue === '='){
+        evaluate();
+    } else if (buttonValue === 'C'){
+        largeScreen.textContent = "";
+        smallScreen.textContent = "";
+        num1 = "";
+        num2 = "";
+        operator = null;
+    } else if (buttonValue === 'DEL'){
+        largeScreen.textContent = largeScreen.textContent.slice(0, -1);
+    } else if (buttonValue === '+/-'){
+        if (largeScreen.textContent === "") return;
+        if (largeScreen.textContent.startsWith("-")) {
+            largeScreen.textContent = largeScreen.textContent.slice(1);
+        } else {
+            largeScreen.textContent = "-" + largeScreen.textContent;
+        }
+    } else if (buttonValue ==='%'){
+        if (largeScreen.textContent === "") return;
+        const number = parseFloat(largeScreen.textContent);
+        const percentage = number / 100;
+        largeScreen.textContent = percentage.toFixed(2);
+    } else if (buttonValue ==='.'){
+        if (refreshScreen) {
+            largeScreen.textContent = "0";
+            refreshScreen = false;
+        }
+        if (!largeScreen.textContent.includes(".")) {
+        largeScreen.textContent += ".";
+        }
+    }
+}
+
+// Attach event listeners to buttons
+buttons.forEach(button => {
+    button.addEventListener('click', () => handleButtonClick(button.textContent));
+});
+
+// Initialize calculator
+resetCalculator();
+
+//Keyboard setup
+document.addEventListener("keydown", handleKeyInput);
+
+function handleKeyInput(e) {
+    let eKey;
+    if (e.key === 'C' || e.key === 'Escape'){
+        eKey = 'C'
+    } else if (e.key === 'Backspace'){
+        eKey = 'DEL'
+    } else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault(); // Prevent form submission if inside a form
+    }else {
+        eKey = e.key;
+    }
+    handleButtonClick(eKey);
+}

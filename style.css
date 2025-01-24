@@ -31,12 +31,12 @@ body {
     padding: 10px 15px 5px;
 }
 
-.top .prev {
+.top .smallScreen {
     font-size: 15px;
     color: rgb(104, 104, 104);
 }
 
-.top .screen {
+.top .largeScreen {
     font-size: 30px;
 }
 
@@ -129,5 +129,4 @@ button.equal:hover {
 button:active {
     transform: translateY(2px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    /* Reduced shadow */
 }
